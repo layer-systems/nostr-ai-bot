@@ -10,6 +10,8 @@ from pynostr.message_type import ClientMessageType
 from pynostr.key import PrivateKey
 from pynostr.filters import FiltersList, Filters
 from pynostr.encrypted_dm import EncryptedDirectMessage
+from gpt4all import GPT4All
+
 
 relay_manager = RelayManager(timeout=2)
 
@@ -50,9 +52,9 @@ try:
             if(currentTime - 60 < event_msg.event.created_at):
                 if(event_msg.event.id in messages_done):
                     continue
-                print(msg_decrypted.cleartext_content + " from " + event_msg.event.pubkey)
-                # print(event_msg.event.id)
-                messages_done.append(event_msg.event.id)
+                gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
+                response = gptj.generate(msg_decrypted.cleartext_content, False)
+                print(response)
                 continue
         time.sleep(10)
         relay_manager.close_all_relay_connections()

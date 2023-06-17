@@ -13,6 +13,8 @@ from pynostr.encrypted_dm import EncryptedDirectMessage
 
 relay_manager = RelayManager(timeout=2)
 
+messages_done = []
+
 try:
     env_private_key = os.environ.get("PRIVATE_KEY")
     if not env_private_key:
@@ -31,19 +33,30 @@ try:
     print("Pubkey: " + private_key.public_key.bech32())
     print("Pubkey (hex): " + private_key.public_key.hex())
 
-    filters = FiltersList([Filters(pubkey_refs=[private_key.public_key.hex()], kinds=[EventKind.ENCRYPTED_DIRECT_MESSAGE])])
-    subscription_id = uuid.uuid1().hex
-    relay_manager.add_subscription_on_all_relays(subscription_id, filters)
-    relay_manager.run_sync()
-    while relay_manager.message_pool.has_notices():
-        notice_msg = relay_manager.message_pool.get_notice()
-        print("Notice: " + notice_msg.content)
-    while relay_manager.message_pool.has_events():
-        event_msg = relay_manager.message_pool.get_event()
-        msg_decrypted = EncryptedDirectMessage()
-        msg_decrypted.decrypt(private_key_hex=private_key.hex(), encrypted_message=event_msg.event.content, public_key_hex=event_msg.event.pubkey)
-        print (event_msg.event.pubkey + " send " + msg_decrypted.cleartext_content)
-    relay_manager.close_all_relay_connections()
+    while(True):
+        filters = FiltersList([Filters(pubkey_refs=[private_key.public_key.hex()], kinds=[EventKind.ENCRYPTED_DIRECT_MESSAGE])])
+        subscription_id = uuid.uuid1().hex
+        relay_manager.add_subscription_on_all_relays(subscription_id, filters)
+        relay_manager.run_sync()
+        while relay_manager.message_pool.has_notices():
+            notice_msg = relay_manager.message_pool.get_notice()
+            print("Notice: " + notice_msg.content)
+        while relay_manager.message_pool.has_events():
+            event_msg = relay_manager.message_pool.get_event()
+            msg_decrypted = EncryptedDirectMessage()
+            msg_decrypted.decrypt(private_key_hex=private_key.hex(), encrypted_message=event_msg.event.content, public_key_hex=event_msg.event.pubkey)
+            # print (event_msg.event.pubkey + " send " + msg_decrypted.cleartext_content)
+            currentTime = time.time()
+            if(currentTime - 60 < event_msg.event.created_at):
+                if(event_msg.event.id in messages_done):
+                    continue
+                print(msg_decrypted.cleartext_content + " from " + event_msg.event.pubkey)
+                # print(event_msg.event.id)
+                messages_done.append(event_msg.event.id)
+                continue
+        time.sleep(10)
+        relay_manager.close_all_relay_connections()
+
 
 except Exception as e:
     print(e)

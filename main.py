@@ -55,6 +55,7 @@ try:
                     continue
                 response = gptj.generate(msg_decrypted.cleartext_content, False)
                 print(response)
+                messages_done.append(event_msg.event.id)
                 continue
         time.sleep(10)
         relay_manager.close_all_relay_connections()

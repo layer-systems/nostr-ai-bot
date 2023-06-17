@@ -13,6 +13,7 @@ from pynostr.encrypted_dm import EncryptedDirectMessage
 from gpt4all import GPT4All
 
 
+gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
 relay_manager = RelayManager(timeout=2)
 
 messages_done = []
@@ -52,7 +53,6 @@ try:
             if(currentTime - 60 < event_msg.event.created_at):
                 if(event_msg.event.id in messages_done):
                     continue
-                gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
                 response = gptj.generate(msg_decrypted.cleartext_content, False)
                 print(response)
                 continue

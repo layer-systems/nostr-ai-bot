@@ -1,0 +1,4 @@
+requests
+# time
+# nostr
+pynostr

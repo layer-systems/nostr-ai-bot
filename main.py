@@ -55,7 +55,7 @@ try:
                     continue
                 print (event_msg.event.pubkey + " send " + msg_decrypted.cleartext_content)
                 print ("-> Generating Answer..")
-                response = gptj.generate(msg_decrypted.cleartext_content, False)
+                response = gptj.generate(msg_decrypted.cleartext_content)[1:]
                 print("--> " + response)
                 print("Sending response to " + event_msg.event.pubkey)
 

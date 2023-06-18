@@ -53,7 +53,7 @@ try:
             if(currentTime - 60 < event_msg.event.created_at):
                 if(event_msg.event.id in messages_done):
                     continue
-                print (event_msg.event.pubkey + " send " + msg_decrypted.cleartext_content)
+                print ("'" +msg_decrypted.cleartext_content + "' from " + event_msg.event.pubkey)
                 print ("-> Generating Answer..")
                 # response = gptj.generate(msg_decrypted.cleartext_content, False)[1:]
                 messages = [{"role": "user", "content": msg_decrypted.cleartext_content}]

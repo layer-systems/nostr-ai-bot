@@ -11,6 +11,7 @@ from pynostr.key import PrivateKey
 from pynostr.filters import FiltersList, Filters
 from pynostr.encrypted_dm import EncryptedDirectMessage
 from gpt4all import GPT4All
+import gc
 
 
 relay_manager = RelayManager(timeout=2)
@@ -55,6 +56,7 @@ def run():
                 print ("'" +msg_decrypted.cleartext_content + "' from " + event_msg.event.pubkey)
                 print ("-> Generating Answer..")
                 # response = gptj.generate(msg_decrypted.cleartext_content, False)[1:]
+                gc.collect()
                 messages = [{"role": "user", "content": msg_decrypted.cleartext_content}]
                 gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
                 response = gptj.chat_completion(messages)['choices'][0]['message']['content'][1:]
@@ -70,6 +72,10 @@ def run():
                 dm_event.sign(private_key.hex())
                 relay_manager.publish_event(dm_event)
                 print("Response sent to " + event_msg.event.pubkey)
+
+                # Free memory
+                del gptj
+                gc.collect()
 
                 messages_done.append(event_msg.event.id)
                 continue

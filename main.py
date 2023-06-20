@@ -57,7 +57,7 @@ def run():
                 # response = gptj.generate(msg_decrypted.cleartext_content, False)[1:]
                 messages = [{"role": "user", "content": msg_decrypted.cleartext_content}]
                 gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
-                response = gptj.chat_completion(messages)['choices'][0]['message']['content'][2:]
+                response = gptj.chat_completion(messages)['choices'][0]['message']['content'][1:]
                 # print("--> " + response)
                 print("Sending response to " + event_msg.event.pubkey)
 

@@ -15,9 +15,9 @@ from gpt4all import GPT4All
 
 relay_manager = RelayManager(timeout=2)
 
-messages_done = []
+def run():
+    messages_done = []
 
-try:
     env_private_key = os.environ.get("PRIVATE_KEY")
     if not env_private_key:
         print('The environment variable "PRIVATE_KEY" is not set.')
@@ -76,8 +76,13 @@ try:
         time.sleep(10)
         relay_manager.close_all_relay_connections()
 
-
-except Exception as e:
-    print(e)
+try:
+    run()
+except KeyboardInterrupt:
+    print("KeyboardInterrupt")
     relay_manager.close_all_relay_connections()
     exit(1)
+except:
+    print("Exception")
+    relay_manager.close_all_relay_connections()
+    run()

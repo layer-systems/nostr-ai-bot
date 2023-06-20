@@ -11,13 +11,14 @@ from pynostr.key import PrivateKey
 from pynostr.filters import FiltersList, Filters
 from pynostr.encrypted_dm import EncryptedDirectMessage
 from gpt4all import GPT4All
+import gc
 
 
 relay_manager = RelayManager(timeout=2)
 
-messages_done = []
+def run():
+    messages_done = []
 
-try:
     env_private_key = os.environ.get("PRIVATE_KEY")
     if not env_private_key:
         print('The environment variable "PRIVATE_KEY" is not set.')
@@ -55,9 +56,10 @@ try:
                 print ("'" +msg_decrypted.cleartext_content + "' from " + event_msg.event.pubkey)
                 print ("-> Generating Answer..")
                 # response = gptj.generate(msg_decrypted.cleartext_content, False)[1:]
+                gc.collect()
                 messages = [{"role": "user", "content": msg_decrypted.cleartext_content}]
                 gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
-                response = gptj.chat_completion(messages)['choices'][0]['message']['content'][2:]
+                response = gptj.chat_completion(messages)['choices'][0]['message']['content'][1:]
                 # print("--> " + response)
                 print("Sending response to " + event_msg.event.pubkey)
 
@@ -71,13 +73,22 @@ try:
                 relay_manager.publish_event(dm_event)
                 print("Response sent to " + event_msg.event.pubkey)
 
+                # Free memory
+                del gptj
+                gc.collect()
+
                 messages_done.append(event_msg.event.id)
                 continue
         time.sleep(10)
         relay_manager.close_all_relay_connections()
 
-
-except Exception as e:
-    print(e)
+try:
+    run()
+except KeyboardInterrupt:
+    print("KeyboardInterrupt")
     relay_manager.close_all_relay_connections()
     exit(1)
+except:
+    print("Exception")
+    relay_manager.close_all_relay_connections()
+    run()

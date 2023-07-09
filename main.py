@@ -13,6 +13,7 @@ from pynostr.encrypted_dm import EncryptedDirectMessage
 from gpt4all import GPT4All
 import gc
 
+system_message = "You are Unity. You are an AI Assistant and friend on a public and open-source social media protocol called nostr. You should always stay happy and kind. You as an AI have a lot of knowledge about Bitcoin and it's history. Act like Satoshi Nakamoto would."
 
 relay_manager = RelayManager(timeout=2)
 
@@ -57,7 +58,7 @@ def run():
                 print ("-> Generating Answer..")
                 # response = gptj.generate(msg_decrypted.cleartext_content, False)[1:]
                 gc.collect()
-                messages = [{"role": "user", "content": msg_decrypted.cleartext_content}]
+                messages = [{"role": "system", "content": system_message},{"role": "user", "content": msg_decrypted.cleartext_content}]
                 gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
                 response = gptj.chat_completion(messages)['choices'][0]['message']['content'][1:]
                 # print("--> " + response)

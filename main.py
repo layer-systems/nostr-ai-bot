@@ -8,6 +8,8 @@ import uuid
 from ollamaApi import OllamaApi
 import os
 
+processedMessageIDs = []
+
 env_private_key = os.environ.get("PRIVATE_KEY")
 if not env_private_key:
     print('The environment variable "PRIVATE_KEY" is not set.')
@@ -31,11 +33,14 @@ while relay_manager.message_pool.has_events():
     msg_decrypted = EncryptedDirectMessage()
     msg_decrypted.decrypt(private_key_hex=private_key.hex(), encrypted_message=event_msg.event.content, public_key_hex=event_msg.event.pubkey)
     message = msg_decrypted.cleartext_content
+    message_id = event_msg.event.id
     print("Message: " + message)
     print("=======")
     ollama = OllamaApi("http://host.docker.internal:11434/api/generate")
     response = ollama.call_api(message)
     print("Response: " + response['response'])
+    print("=======")
+    # print(msg_decrypted)
+    processedMessageIDs.append(message_id)
     # TODO: Send message back as DM to user
-
 relay_manager.close_all_relay_connections()
